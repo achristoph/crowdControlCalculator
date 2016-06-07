@@ -7,58 +7,62 @@ var crowdControlCalc = (function () {
   var calculator = {};
 
   calculator.calculateCrowdControlChange = function (input) {
-    var currentSeverity = 0;
-    var effects = input.sort(function(a, b) {return a[0] - b[0]});
-    var queuedEffects = {};
-    var effectChanges = [];
-    var lastEffect = effects[effects.length-1];
+    var effects = input.sort();
+    var lastEffect = effects[effects.length - 1];
     var lastEffectEndTime = lastEffect[0] + lastEffect[1];
+    var i = 0;
+    var effectChanges = [];
+    var queuedEffects = [];
+    var currentSeverity = 0;
 
-    for (var i = 0; i < effects.length; i++) {
-      var effectStart = effects[i][0];
-      var effectEnd = (effects[i][0] + effects[i][1]);
-      var effectSeverity = effects[i][2];
-
-      if (effectSeverity > currentSeverity) {
-        effectChanges.push([effectStart, effectSeverity]);
-        currentSeverity = effectSeverity;
-      }
-      queuedEffects[effectEnd] = effectSeverity;
-      var j = effectStart;
-
-      if (i == effects.length - 1) {
-        effectChanges.push([effectEnd, 0]);
-      }
-      else {
-        while (j <= effects[i + 1][0]) {
-          var severityInQueue = queuedEffects[j];
-          if (severityInQueue) {
-            var nextInQ = j + 1;
-            while (!queuedEffects[nextInQ] && nextInQ <= lastEffectEndTime) {
-              nextInQ++;
-            }
-            currentSeverity = queuedEffects[nextInQ];
-            if (currentSeverity) {
-              effectChanges.push([j, queuedEffects[nextInQ]]);
-            } else {
-              effectChanges.push([j, 0]);
-              currentSeverity = 0;
-              break;
-            }
+    while (i <= lastEffectEndTime) {
+      if (queuedEffects.length > 0 && queuedEffects[0][0] == i) { //found endTime for this i in queue
+        queuedEffects.shift();
+        if (effects.length > 0 && effects[0][0] == i) { //found effect coming ,then compare it with queuedEffect
+          if (queuedEffects.length == 0 && (effects[0][2] != currentSeverity)) {
+            effectChanges.push([effects[0][0], effects[0][2]]);
+            currentSeverity = effects[0][2];
           }
-          j++;
+          else if (queuedEffects.length > 0 && effects[0][2] > queuedEffects[0][2]) {
+            effectChanges.push([effects[0][0], effects[0][2]]);
+            currentSeverity = effects[0][2];
+          }
+        } else {
+          var severity = queuedEffects[0] ? queuedEffects[0][1] : 0;
+          if (currentSeverity == severity) { //only record change for effect that has higher severity than the current one
+            // p 'ignored'
+          }
+          else {
+            effectChanges.push([i, severity]);
+            currentSeverity = severity;
+          }
         }
       }
+
+      while (effects.length > 0 && effects[0][0] == i) { //found startTime for this i in queue
+        var e = effects.shift();
+        var effectStartTime = e[0];
+        var effectEndTime = e[0] + e[1];
+        var effectSeverity = e[2];
+
+        if (effectSeverity > currentSeverity) {
+          currentSeverity = effectSeverity;
+          effectChanges.push([effectStartTime, effectSeverity])
+        }
+
+        queuedEffects.push([effectEndTime, effectSeverity]);
+        queuedEffects = queuedEffects.sort();
+      }
+      i++;
     }
     return effectChanges;
   };
-
   return calculator;
 }());
 
-console.log(crowdControlCalc.calculateCrowdControlChange([[2, 4, 5], [8, 1, 1], [3, 4, 2], [4, 1, 6]]));
-// console.log(crowdControlCalc.calculateCrowdControlChange([[1, 2, 3], [2, 3, 3], [1, 5, 3], [6, 2, 3], [6, 1, 3]]));
+// console.log(crowdControlCalc.calculateCrowdControlChange([[2, 4, 5], [8, 1, 1], [3, 4, 2], [4, 1, 6]]));
 // console.log(crowdControlCalc.calculateCrowdControlChange([[1, 2, 5], [2, 3, 3], [4, 2, 4]]));
 // console.log(crowdControlCalc.calculateCrowdControlChange([[1, 2, 4], [5, 3, 6]]));
 // console.log(crowdControlCalc.calculateCrowdControlChange([[0, 2, 3], [2, 3, 4], [5, 2, 2]]));
+// console.log(crowdControlCalc.calculateCrowdControlChange([[1, 2, 3], [2, 3, 3], [1, 5, 3], [6, 2, 3], [6, 1, 3]]));
 
