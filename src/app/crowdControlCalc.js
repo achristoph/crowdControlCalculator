@@ -29,10 +29,7 @@ var crowdControlCalc = (function () {
           }
         } else {
           var severity = queuedEffects[0] ? queuedEffects[0][1] : 0;
-          if (currentSeverity == severity) { //only record change for effect that has higher severity than the current one
-            // p 'ignored'
-          }
-          else {
+          if (currentSeverity != severity) { //only record change for effect that has higher severity than the current one
             effectChanges.push([i, severity]);
             currentSeverity = severity;
           }
@@ -60,9 +57,9 @@ var crowdControlCalc = (function () {
   return calculator;
 }());
 
-// console.log(crowdControlCalc.calculateCrowdControlChange([[2, 4, 5], [8, 1, 1], [3, 4, 2], [4, 1, 6]]));
-// console.log(crowdControlCalc.calculateCrowdControlChange([[1, 2, 5], [2, 3, 3], [4, 2, 4]]));
-// console.log(crowdControlCalc.calculateCrowdControlChange([[1, 2, 4], [5, 3, 6]]));
-// console.log(crowdControlCalc.calculateCrowdControlChange([[0, 2, 3], [2, 3, 4], [5, 2, 2]]));
-// console.log(crowdControlCalc.calculateCrowdControlChange([[1, 2, 3], [2, 3, 3], [1, 5, 3], [6, 2, 3], [6, 1, 3]]));
+console.log(crowdControlCalc.calculateCrowdControlChange([[2, 4, 5], [8, 1, 1], [3, 4, 2], [4, 1, 6]]));
+console.log(crowdControlCalc.calculateCrowdControlChange([[1, 2, 5], [2, 3, 3], [4, 2, 4]]));
+console.log(crowdControlCalc.calculateCrowdControlChange([[1, 2, 4], [5, 3, 6]]));
+console.log(crowdControlCalc.calculateCrowdControlChange([[0, 2, 3], [2, 3, 4], [5, 2, 2]]));
+console.log(crowdControlCalc.calculateCrowdControlChange([[1, 2, 3], [2, 3, 3], [1, 5, 3], [6, 2, 3], [6, 1, 3]]));
 
